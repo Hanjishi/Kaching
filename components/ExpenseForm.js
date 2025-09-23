@@ -12,7 +12,7 @@ export default function ExpenseForm({ onSubmit, initialValues }) {
     if (!amount || !category || !date) return;
     onSubmit({
       amount: parseFloat(amount),
-      category,
+      category: category.trim().toLowerCase(),
       date,
       description,
     });
