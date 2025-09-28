@@ -5,7 +5,7 @@ import { getExpenses } from "../services/api";
 import ExpenseItem from "../components/ExpenseItem";
 import styles from "../styles/Theme";
 
-export default function ExpenseList() {
+export default function ExpenseList({ navigation }) {
   const [expenses, setExpenses] = useState([]);
   const [monthlyBudget, setMonthlyBudget] = useState("10000.00");
   const [inputBudget, setInputBudget] = useState("");
@@ -78,7 +78,12 @@ export default function ExpenseList() {
       <FlatList
         data={expenses}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => <ExpenseItem expense={item} />}
+        renderItem={({ item }) => (
+          <ExpenseItem
+            expense={item}
+            onPress={() => navigation.navigate("EditExpense", { expense: item })}
+          />
+        )}
       />
 
       {/* --- Summary Section --- */}
