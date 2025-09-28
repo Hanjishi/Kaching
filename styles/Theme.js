@@ -4,12 +4,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#e6f5ec",
   },
   title: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: "bold",
     marginBottom: 12,
+    color: "#006400",
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: "#006400",
+    textAlign: "center",
   },
   card: {
     backgroundColor: "#fff",
@@ -25,15 +34,15 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#2e86de",
+    color: "#27ae60",
   },
   category: {
     fontSize: 16,
-    color: "#333",
+    color: "#2c3e50",
   },
   date: {
     fontSize: 14,
-    color: "#777",
+    color: "#7f8c8d",
   },
   description: {
     fontSize: 14,
@@ -48,10 +57,23 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#2ecc71", 
     borderRadius: 8,
     padding: 10,
     marginBottom: 12,
+    backgroundColor: "#f9fdf9", 
+  },
+  button: {
+    backgroundColor: "#2ecc71", 
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
