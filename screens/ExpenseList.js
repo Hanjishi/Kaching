@@ -102,6 +102,7 @@ export default function ExpenseList() {
         >
           Remaining Balance: ₱{remainingBalance.toFixed(2)}
         </Text>
+        
       </View>
     </View>
   );
