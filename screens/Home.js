@@ -23,8 +23,8 @@ export default function Home({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>💸 Welcome to Kaching</Text>
-      <Text style={styles.subtitle}>Your personal expense tracker</Text>
+      <Text style={styles.title}>💸 Welcome to Kaching 💸</Text>
+      <Text style={styles.subtitle}>Your personal budget and expense tracker</Text>
 
       {/* --- Card Grid --- */}
       <View style={styles.cardContainer}>
