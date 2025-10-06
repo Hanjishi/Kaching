@@ -1,4 +1,3 @@
-// screens/QuickAdjust.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -12,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const STORAGE_KEY = "savingsBalance"; // <- separate from monthlyBudget
 
-export default function QuickAdjust() {
+export default function Savings() {
   const [balance, setBalance] = useState(0);
   const [isAdding, setIsAdding] = useState(true); // true = add, false = deduct
   const amounts = [1, 5, 10, 20, 50, 100, 1000];

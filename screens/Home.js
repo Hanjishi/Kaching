@@ -66,7 +66,7 @@ export default function Home({ navigation }) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("QuickAdjust")}
+          onPress={() => navigation.navigate("Savings")}
         >
           <FontAwesome5 name="piggy-bank" size={32} color="#9C27B0" />
           <Text style={styles.cardText}>Savings</Text>
@@ -79,7 +79,7 @@ export default function Home({ navigation }) {
       onPress={() => setAdvice(tips[Math.floor(Math.random() * tips.length)])}
       >
       <Text style={styles.tipText}>💡 Tip: {advice}</Text>
-      <Text style={{ fontSize: 12, color: "#999", marginTop: 5 }}>
+      <Text style={{textAlign: "center", fontSize: 12, color: "#999", marginTop: 5 }}>
       (Tap for another tip)
        </Text>
       </TouchableOpacity>

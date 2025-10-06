@@ -8,7 +8,8 @@ import ExpenseList from "../screens/ExpenseList";
 import AddExpense from "../screens/AddExpense";
 import EditExpense from "../screens/EditExpense";
 import Summary from "../screens/Summary";
-import QuickAdjust from "../screens/QuickAdjust";
+import Savings from "../screens/Savings";
+
 
 
 const Stack = createNativeStackNavigator();
@@ -27,7 +28,7 @@ export default function AppNavigator() {
         <Stack.Screen name="AddExpense" component={AddExpense} />
         <Stack.Screen name="EditExpense" component={EditExpense} />
         <Stack.Screen name="Summary" component={Summary} />
-        <Stack.Screen name="QuickAdjust" component={QuickAdjust} />
+        <Stack.Screen name="Savings" component={Savings} />
       </Stack.Navigator>
     </NavigationContainer>
   );
