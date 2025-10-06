@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
+import * as Progress from "react-native-progress";
+import { getExpenses } from "../services/api";
 
 export default function Home({ navigation }) {
   const tips = [
@@ -28,8 +30,25 @@ export default function Home({ navigation }) {
   ];
 
   const [advice, setAdvice] = useState("");
+  const [savingsProgress, setSavingsProgress] = useState(0.45); // Example progress
+  const goalAmount = 10000; // Example goal
+  const savedAmount = goalAmount * savingsProgress;
+  const [topCategories, setTopCategories] = useState([]);
 
   useEffect(() => {
+    async function loadExpenses() {
+      const expenses = await getExpenses();
+      const categoryTotals = {};
+
+      expenses.forEach((e) => {
+        categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+      });
+
+      const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+      setTopCategories(sorted.slice(0, 3)); // Top 3
+    }
+
+    loadExpenses();
     setAdvice(tips[Math.floor(Math.random() * tips.length)]);
   }, []);
 
@@ -73,15 +92,73 @@ export default function Home({ navigation }) {
         </TouchableOpacity>
       </View>
 
+      {/* --- Savings Goal Progress --- */}
+      <View style={styles.progressContainer}>
+        <Text style={styles.progressTitle}>Savings Goal Progress</Text>
+        <Progress.Bar
+          progress={savingsProgress}
+          width={250}
+          color="#9C27B0"
+          borderRadius={10}
+          height={15}
+        />
+        <Text style={styles.progressText}>
+          ₱{savedAmount.toFixed(0)} / ₱{goalAmount}
+        </Text>
+      </View>
+
+      {/* 🌟 Top Spending Categories */}
+      {topCategories.length > 0 && (
+        <View
+          style={[
+            styles.card,
+            {
+              marginTop: 20,
+              backgroundColor: "#fff7e6",
+              borderColor: "#f39c12",
+              borderWidth: 2,
+              borderRadius: 0,
+              padding: 15,
+              width: "100%",
+            },
+          ]}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: "#e67e22",
+              marginBottom: 8,
+            }}
+          >
+            🌟 Top Spending Categories
+          </Text>
+          {topCategories.map(([cat, amt], i) => (
+            <Text key={cat} style={{ fontSize: 16, color: "#333" }}>
+              {i + 1}. {cat}: ₱{amt.toFixed(2)}
+            </Text>
+          ))}
+        </View>
+      )}
+
       {/* --- Saving Advice --- */}
-      <TouchableOpacity 
-       style={styles.tipBox} 
-      onPress={() => setAdvice(tips[Math.floor(Math.random() * tips.length)])}
+      <TouchableOpacity
+        style={styles.tipBox}
+        onPress={() =>
+          setAdvice(tips[Math.floor(Math.random() * tips.length)])
+        }
       >
-      <Text style={styles.tipText}>💡 Tip: {advice}</Text>
-      <Text style={{textAlign: "center", fontSize: 12, color: "#999", marginTop: 5 }}>
-      (Tap for another tip)
-       </Text>
+        <Text style={styles.tipText}>💡 Tip: {advice}</Text>
+        <Text
+          style={{
+            textAlign: "center",
+            fontSize: 12,
+            color: "#999",
+            marginTop: 5,
+          }}
+        >
+          (Tap for another tip)
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -120,8 +197,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     marginBottom: 15,
-    elevation: 3, // shadow for Android
-    shadowColor: "#000", // shadow for iOS
+    elevation: 3,
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 5,
   },
@@ -129,6 +206,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     fontWeight: "600",
+  },
+  progressContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  progressTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  progressText: {
+    fontSize: 14,
+    color: "#555",
+    marginTop: 5,
   },
   tipBox: {
     marginTop: 30,
