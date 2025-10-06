@@ -13,6 +13,18 @@ export default function Home({ navigation }) {
     "Invest in needs, not wants.",
     "Automate your savings every payday.",
     "Cut down subscriptions you rarely use.",
+    "Use cash for discretionary spending to limit overspending.",
+    "Review your financial goals regularly.",
+    "Plan your purchases during sales and discounts.",
+    "Create an emergency fund covering 3-6 months of expenses.",
+    "Use budgeting apps to monitor your finances.",
+    "Avoid high-interest debt like credit cards.",
+    "Set specific financial goals with deadlines.",
+    "Negotiate bills and look for better deals on services.",
+    "Limit dining out to once a week.",
+    "Buy generic brands instead of name brands.",
+    "Use public transportation to save on gas and parking.",
+    "Sell unused items around your home for extra cash.",
   ];
 
   const [advice, setAdvice] = useState("");
