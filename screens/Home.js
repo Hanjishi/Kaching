@@ -30,8 +30,8 @@ export default function Home({ navigation }) {
   ];
 
   const [advice, setAdvice] = useState("");
-  const [savingsProgress, setSavingsProgress] = useState(0.45); // Example progress
-  const goalAmount = 10000; // Example goal
+  const [savingsProgress, setSavingsProgress] = useState(0.45);
+  const goalAmount = 10000;
   const savedAmount = goalAmount * savingsProgress;
   const [topCategories, setTopCategories] = useState([]);
 
@@ -45,7 +45,7 @@ export default function Home({ navigation }) {
       });
 
       const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
-      setTopCategories(sorted.slice(0, 3)); // Top 3
+      setTopCategories(sorted.slice(0, 3));
     }
 
     loadExpenses();
