@@ -25,6 +25,7 @@ export default function Home({ navigation }) {
     "Buy generic brands instead of name brands.",
     "Use public transportation to save on gas and parking.",
     "Sell unused items around your home for extra cash.",
+    "Pay yourself first—transfer savings immediately when you get paid.",
   ];
 
   const [advice, setAdvice] = useState("");
