@@ -1,126 +1,155 @@
 import React, { useState } from "react";
-import { View, TextInput, Text, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Button,
+  ScrollView,
+  Alert,
+} from "react-native";
 import styles from "../styles/Theme";
+import { addExpense } from "../services/api";
 
-export default function ExpenseForm({ onSubmit }) {
+export default function ExpenseForm({ navigation }) {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [showCategories, setShowCategories] = useState(false);
 
-  const categories = ["Food", "Transport", "Bills", "Shopping", "Entertainment", "Other"];
+  const categories = [
+    "Food",
+    "Transport",
+    "Bills",
+    "Shopping",
+    "Entertainment",
+    "Other",
+  ];
 
-  const handleSubmit = () => {
-    if (!amount || !category) return;
-    const timestamp = new Date().toLocaleString();
+  const handleSubmit = async () => {
+    if (!amount || !category) {
+      Alert.alert("Error", "Please enter both amount and category.");
+      return;
+    }
 
-    onSubmit({
+    const expense = {
       amount: parseFloat(amount),
-      category: category.trim().toLowerCase(),
-      description,
-      timestamp,
-    });
+      category,
+      description: description.trim(),
+      timestamp: new Date().toLocaleString(),
+    };
 
-    setAmount("");
-    setCategory("");
-    setDescription("");
+    try {
+      await addExpense(expense);
+      Alert.alert("Success", "Expense saved successfully!");
+      setAmount("");
+      setCategory("");
+      setDescription("");
+      setShowCategories(false);
+      if (navigation) navigation.goBack(); // ✅ navigate back after saving
+    } catch (error) {
+      console.error("Error saving expense:", error);
+      Alert.alert("Error", "Failed to save expense.");
+    }
   };
 
   return (
-    <View style={[styles.form, { paddingVertical: 20 }]}>
-      {/* --- Amount --- */}
-      <Text style={styles.label}>Amount</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter amount"
-        keyboardType="numeric"
-        value={amount}
-        onChangeText={setAmount}
-      />
+    <ScrollView
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: "center",
+        padding: 20,
+      }}
+    >
+      <View style={styles.formContainer}>
+        {/* Amount */}
+        <Text style={styles.label}>Amount</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter amount"
+          keyboardType="numeric"
+          value={amount}
+          onChangeText={setAmount}
+        />
 
-      {/* --- Category Section --- */}
-      <Text style={styles.label}>Category</Text>
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => setShowCategories(!showCategories)}
-        style={{
-          borderWidth: 1,
-          borderColor: "#2ecc71",
-          borderRadius: 10,
-          paddingVertical: 14,
-          paddingHorizontal: 14,
-          backgroundColor: "#f9fff9",
-        }}
-      >
-        <Text
+        {/* Category */}
+        <Text style={styles.label}>Category</Text>
+        <TouchableOpacity
           style={{
-            fontSize: 16,
-            color: category ? "#2c3e50" : "#999",
-          }}
-        >
-          {category ? category : "Select Category"}
-        </Text>
-      </TouchableOpacity>
-
-      {/* ✅ Category options shown immediately below when clicked */}
-      {showCategories && (
-        <View
-          style={{
-            marginTop: 8,
-            backgroundColor: "#fff",
+            backgroundColor: "#f0f0f0",
             borderRadius: 10,
-            borderWidth: 1,
-            borderColor: "#2ecc71",
-            overflow: "hidden",
+            padding: 12,
+            marginBottom: 10,
           }}
+          onPress={() => setShowCategories(!showCategories)}
         >
-          <FlatList
-            data={categories}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
+          <Text style={{ fontSize: 16, color: "#333" }}>
+            {category ? category : "Select Category"}
+          </Text>
+        </TouchableOpacity>
+
+        {showCategories && (
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 10,
+              elevation: 2,
+              marginBottom: 10,
+              paddingVertical: 5,
+            }}
+          >
+            {categories.map((item) => (
               <TouchableOpacity
+                key={item}
                 onPress={() => {
                   setCategory(item);
                   setShowCategories(false);
                 }}
                 style={{
-                  paddingVertical: 12,
-                  paddingHorizontal: 16,
-                  borderBottomWidth: item !== "Other" ? 1 : 0,
-                  borderColor: "#eee",
+                  paddingVertical: 10,
+                  paddingHorizontal: 15,
+                  borderBottomWidth: item === "Other" ? 0 : 1,
+                  borderColor: "#ddd",
                 }}
               >
-                <Text style={{ fontSize: 16, color: "#2c3e50" }}>{item}</Text>
+                <Text style={{ fontSize: 16 }}>{item}</Text>
               </TouchableOpacity>
-            )}
-          />
+            ))}
+          </View>
+        )}
+
+        {/* Description */}
+        <Text style={styles.label}>Description</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter description (optional)"
+          value={description}
+          onChangeText={setDescription}
+        />
+
+        {/* Reminder */}
+        <View
+          style={{
+            backgroundColor: "#E8F5E9",
+            borderLeftWidth: 5,
+            borderLeftColor: "#4CAF50",
+            padding: 10,
+            marginVertical: 10,
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ color: "#2E7D32", fontSize: 14 }}>
+            💡 Reminder: Ask yourself — is this a{" "}
+            <Text style={{ fontWeight: "bold" }}>need</Text> or a{" "}
+            <Text style={{ fontWeight: "bold" }}>want</Text>?
+          </Text>
         </View>
-      )}
 
-      {/* --- Description --- */}
-      <Text style={styles.label}>Description</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter description (optional)"
-        value={description}
-        onChangeText={setDescription}
-      />
-
-      {/* --- Save Expense --- */}
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#2ecc71",
-          paddingVertical: 14,
-          borderRadius: 10,
-          alignItems: "center",
-          marginTop: 10,
-        }}
-        onPress={handleSubmit}
-      >
-        <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-          Save Expense
-        </Text>
-      </TouchableOpacity>
-    </View>
+        {/* Save Button */}
+        <View style={{ marginTop: 10 }}>
+          <Button title="Save Expense" onPress={handleSubmit} />
+        </View>
+      </View>
+    </ScrollView>
   );
 }

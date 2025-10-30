@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, Button, TextInput, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Picker } from "@react-native-picker/picker";
-import { getExpenses } from "../services/api";
 import ExpenseItem from "../components/ExpenseItem";
+import { getExpenses } from "../services/api";
 import styles from "../styles/Theme";
 
 export default function ExpenseList({ navigation }) {
@@ -13,23 +12,18 @@ export default function ExpenseList({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   useEffect(() => {
-    const loadBudget = async () => {
-      const savedBudget = await AsyncStorage.getItem("monthlyBudget");
-      if (savedBudget) {
-        setMonthlyBudget(savedBudget);
-      }
-    };
     loadBudget();
     fetchExpenses();
   }, []);
 
+  const loadBudget = async () => {
+    const savedBudget = await AsyncStorage.getItem("monthlyBudget");
+    if (savedBudget) setMonthlyBudget(savedBudget);
+  };
+
   const fetchExpenses = async () => {
-    try {
-      const data = await getExpenses();
-      setExpenses(data);
-    } catch (error) {
-      console.error(error);
-    }
+    const data = await getExpenses();
+    setExpenses(data);
   };
 
   const handleSaveBudget = async () => {
@@ -42,20 +36,20 @@ export default function ExpenseList({ navigation }) {
     setInputBudget("");
   };
 
-  // ✅ Filter expenses based on selected category
+  // ✅ Filter by category
+  const categories = ["All", "Food", "Transport", "Bills", "Shopping", "Entertainment", "Other"];
   const filteredExpenses =
     selectedCategory === "All"
       ? expenses
       : expenses.filter(
-          (item) => item.category.toLowerCase() === selectedCategory.toLowerCase()
+          (item) =>
+            item.category?.toLowerCase() === selectedCategory.toLowerCase()
         );
 
-  // Calculate totals
   const totalExpenses = filteredExpenses.reduce(
     (sum, item) => sum + parseFloat(item.amount || 0),
     0
   );
-
   const remainingBalance = parseFloat(monthlyBudget) - totalExpenses;
 
   return (
@@ -83,34 +77,22 @@ export default function ExpenseList({ navigation }) {
         <Button title="Save" onPress={handleSaveBudget} />
       </View>
 
-      {/* ✅ Category Filter Dropdown */}
-      <View
-        style={{
-          borderWidth: 1,
-          borderColor: "#2ecc71",
-          borderRadius: 8,
-          backgroundColor: "#f9fdf9",
-          marginBottom: 15,
-        }}
-      >
-        <Picker
-          selectedValue={selectedCategory}
-          onValueChange={(value) => setSelectedCategory(value)}
-        >
-          <Picker.Item label="All Categories" value="All" />
-          <Picker.Item label="Food" value="Food" />
-          <Picker.Item label="Transport" value="Transport" />
-          <Picker.Item label="Bills" value="Bills" />
-          <Picker.Item label="Shopping" value="Shopping" />
-          <Picker.Item label="Entertainment" value="Entertainment" />
-          <Picker.Item label="Other" value="Other" />
-        </Picker>
+      {/* ✅ Categories shown in one click */}
+      <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 10 }}>
+        {categories.map((cat) => (
+          <Button
+            key={cat}
+            title={cat}
+            color={selectedCategory === cat ? "#2ecc71" : "#aaa"}
+            onPress={() => setSelectedCategory(cat)}
+          />
+        ))}
       </View>
 
       {/* --- Expenses List --- */}
       <FlatList
         data={filteredExpenses}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ExpenseItem
             expense={item}
@@ -125,14 +107,7 @@ export default function ExpenseList({ navigation }) {
       />
 
       {/* --- Summary Section --- */}
-      <View
-        style={{
-          marginTop: 20,
-          padding: 15,
-          borderTopWidth: 1,
-          borderColor: "#ccc",
-        }}
-      >
+      <View style={{ marginTop: 20, padding: 15, borderTopWidth: 1, borderColor: "#ccc" }}>
         <Text style={{ fontSize: 16, fontWeight: "600" }}>
           Total ({selectedCategory}): ₱{totalExpenses.toFixed(2)}
         </Text>
@@ -144,6 +119,9 @@ export default function ExpenseList({ navigation }) {
           }}
         >
           Remaining Balance: ₱{remainingBalance.toFixed(2)}
+        </Text>
+        <Text style={{ marginTop: 10, color: "#888" }}>
+          💡 Reminder: Spend on **needs** first before **wants**!
         </Text>
       </View>
     </View>
