@@ -5,7 +5,7 @@ import styles from "../styles/Theme";
 export default function Splash({ navigation }) {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace("Home");
+      navigation.replace("Login");
     }, 2500);
 
     return () => clearTimeout(timer);

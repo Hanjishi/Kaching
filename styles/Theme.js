@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  // === NEW STYLES for Savings Goal Feature ===
   savingsContainer: {
     flex: 1,
     padding: 20,
@@ -128,7 +127,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Goal tracker styles
   goalSection: {
     marginTop: 40,
     width: "100%",
@@ -185,6 +183,22 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "700",
   },
+
+  pickerContainer: {
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 8,
+  marginBottom: 12,
+  overflow: "hidden",
+  },
+
+  picker: {
+    height: 50,
+    width: "100%",
+    color: "#333",
+  },
+
 });
+
 
 export default styles;
