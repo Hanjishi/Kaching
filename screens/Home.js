@@ -50,20 +50,32 @@ export default function Home({ navigation }) {
 
       {menuVisible && (
         <View style={styles.menuDropdown}>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate("Profile");
+            }}
+          >
             <Ionicons name="person-outline" size={18} color="#555" />
             <Text style={styles.menuText}>Profile</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.menuItem}>
             <Ionicons name="settings-outline" size={18} color="#555" />
             <Text style={styles.menuText}>Settings</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="information-circle-outline" size={18} color="#555" />
+            <Ionicons
+              name="information-circle-outline"
+              size={18}
+              color="#555"
+            />
             <Text style={styles.menuText}>About</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} 
-                  onPress={() => navigation.replace("Login")}>
+
+          <TouchableOpacity style={styles.menuItem}>
             <Ionicons name="log-out-outline" size={18} color="#555" />
             <Text style={styles.menuText}>Logout</Text>
           </TouchableOpacity>
