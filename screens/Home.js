@@ -62,7 +62,8 @@ export default function Home({ navigation }) {
             <Ionicons name="information-circle-outline" size={18} color="#555" />
             <Text style={styles.menuText}>About</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} 
+                  onPress={() => navigation.replace("Login")}>
             <Ionicons name="log-out-outline" size={18} color="#555" />
             <Text style={styles.menuText}>Logout</Text>
           </TouchableOpacity>
@@ -149,8 +150,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "stretch",
     justifyContent: "space-between",
-    marginTop: 40,
+    marginTop: 0,
     marginBottom: 15,
+    padding: 10,
   },
   profileLeft: {
     flexDirection: "row",
@@ -171,7 +173,7 @@ const styles = StyleSheet.create({
   },
   menuDropdown: {
     position: "absolute",
-    top: 115,
+    top: 85,
     right: 15,
     backgroundColor: "#fff",
     borderRadius: 10,
