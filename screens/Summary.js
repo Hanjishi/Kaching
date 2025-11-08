@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Dimensions, ScrollView } from "react-native";
 import { PieChart, BarChart } from "react-native-chart-kit";
 import { getExpenses } from "../services/api";
-import styles from "../styles/Theme";
+import styles from "../styles/SummaryStyles";
+
 
 export default function Summary() {
   const [summary, setSummary] = useState({});
