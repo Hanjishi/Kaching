@@ -32,7 +32,7 @@ export default function LoginScreen({ navigation }) {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-        <Text style={styles.link}>Don’t have an account? Sign Up</Text>
+        <Text style={styles.link}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
     </View>
   );
