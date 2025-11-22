@@ -61,12 +61,22 @@ export default function Home({ navigation }) {
             <Text style={styles.menuText}>Profile</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate("Settings");
+            }}
+          >
             <Ionicons name="settings-outline" size={18} color="#555" />
             <Text style={styles.menuText}>Settings</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate("About");
+            }}
+          >
             <Ionicons
               name="information-circle-outline"
               size={18}
@@ -75,7 +85,11 @@ export default function Home({ navigation }) {
             <Text style={styles.menuText}>About</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} 
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate("Login");
+            }}>
             <Ionicons name="log-out-outline" size={18} color="#555" />
             <Text style={styles.menuText}>Logout</Text>
           </TouchableOpacity>
