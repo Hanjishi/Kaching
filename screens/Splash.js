@@ -1,21 +1,14 @@
 import React, { useEffect } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../styles/Theme";
 
 export default function Splash({ navigation }) {
   useEffect(() => {
-    const checkLogin = async () => {
-    const logged = await AsyncStorage.getItem("loggedIn");
-
-    if (logged === "true") {
-      navigation.replace("Home");
-    } else {
+    const timer = setTimeout(() => {
       navigation.replace("Login");
-    }
-  };
+    }, 2500);
 
-  setTimeout(checkLogin, 3500);
+    return () => clearTimeout(timer);
   }, [navigation]);
 
   return (
@@ -24,6 +17,5 @@ export default function Splash({ navigation }) {
       <ActivityIndicator size="large" color="#4caf50" />
       <Text style={styles.subtitle}>Loading your expenses...</Text>
     </View>
-
   );
 }

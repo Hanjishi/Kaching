@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Switch,
-  Alert,
-  TextInput,
-} from "react-native";
+import { View, Text, TouchableOpacity, Switch, Alert, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Progress from "react-native-progress"; 
 import styles from "../styles/Theme";
-
-const STORAGE_KEY = "savingsBalance";
-const GOAL_KEY = "savingsGoal";
 
 export default function Savings() {
   const [balance, setBalance] = useState(0);
@@ -20,66 +10,68 @@ export default function Savings() {
   const [goalName, setGoalName] = useState("");
   const [goalAmount, setGoalAmount] = useState("");
   const [savedGoal, setSavedGoal] = useState(null);
+  const [userEmail, setUserEmail] = useState("");
 
   const amounts = [1, 5, 10, 20, 50, 100, 1000];
 
   useEffect(() => {
-    (async () => {
-      try {
-        const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        setBalance(saved ? parseFloat(saved) : 0);
+    const loadData = async () => {
+      const email = await AsyncStorage.getItem("@logged_in_user");
+      if (!email) return;
+      setUserEmail(email);
 
-        const goalData = await AsyncStorage.getItem(GOAL_KEY);
-        if (goalData) setSavedGoal(JSON.parse(goalData));
-      } catch (err) {
-        console.log("load error", err);
-      }
-    })();
+      const savedBalance = await AsyncStorage.getItem(`@${email}_savingsBalance`);
+      setBalance(savedBalance ? parseFloat(savedBalance) : 0);
+
+      const goalData = await AsyncStorage.getItem(`@${email}_savingsGoal`);
+      if (goalData) setSavedGoal(JSON.parse(goalData));
+    };
+    loadData();
   }, []);
 
   const handlePress = async (amount) => {
-    try {
-      const newBalance = isAdding ? balance + amount : balance - amount;
-      setBalance(newBalance);
-      await AsyncStorage.setItem(STORAGE_KEY, newBalance.toString());
-    } catch (err) {
-      console.log("save error", err);
-    }
+    if (!userEmail) return;
+    let newBalance = isAdding ? balance + amount : balance - amount;
+    if (newBalance < 0) newBalance = 0;
+    setBalance(newBalance);
+    await AsyncStorage.setItem(`@${userEmail}_savingsBalance`, newBalance.toString());
   };
 
-  const confirmReset = () =>
+  const confirmReset = () => 
     Alert.alert("Reset Balance", "Reset saved balance to 0?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Reset",
         style: "destructive",
         onPress: async () => {
+          if (!userEmail) return;
           setBalance(0);
-          await AsyncStorage.setItem(STORAGE_KEY, "0");
+          await AsyncStorage.setItem(`@${userEmail}_savingsBalance`, "0");
         },
       },
     ]);
 
   const saveGoal = async () => {
-    if (!goalName.trim() || !goalAmount || isNaN(goalAmount)) {
+    if (!goalName.trim() || !goalAmount || isNaN(goalAmount) || parseFloat(goalAmount) <= 0 || !userEmail) {
       Alert.alert("Invalid input", "Please enter a valid goal and amount.");
       return;
     }
     const goalData = { name: goalName, amount: parseFloat(goalAmount) };
-    await AsyncStorage.setItem(GOAL_KEY, JSON.stringify(goalData));
+    await AsyncStorage.setItem(`@${userEmail}_savingsGoal`, JSON.stringify(goalData));
     setSavedGoal(goalData);
     setGoalName("");
     setGoalAmount("");
   };
 
   const resetGoal = async () => {
+    if (!userEmail) return;
     Alert.alert("Remove Goal", "Do you want to remove this goal?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Remove",
         style: "destructive",
         onPress: async () => {
-          await AsyncStorage.removeItem(GOAL_KEY);
+          await AsyncStorage.removeItem(`@${userEmail}_savingsGoal`);
           setSavedGoal(null);
         },
       },
@@ -103,13 +95,7 @@ export default function Savings() {
       </View>
 
       {/* Quick Add Buttons */}
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
-      >
+      <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center" }}>
         {amounts.map((amt) => (
           <TouchableOpacity
             key={amt}

@@ -197,53 +197,8 @@ const styles = StyleSheet.create({
     width: "100%",
     color: "#333",
   },
-  settingRow: {
-  width: "90%",
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  paddingVertical: 15,
-  borderBottomWidth: 1,
-  borderBottomColor: "#ddd",
-  marginVertical: 5,
-  },
 
-  settingLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-
-  note: {
-    fontSize: 13,
-    color: "#888",
-    marginTop: 20,
-    width: "90%",
-    textAlign: "center",
-  },
-  darkContainer: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#121212",
-  },
-  darkTitle: {
-    fontSize: 26,
-    fontWeight: "bold",
-    marginBottom: 12,
-    color: "#90ee90",
-    textAlign: "center",
-  },
-  darkSettingLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#fff",
-  },
-  darkNote: {
-    fontSize: 13,
-    color: "#ccc",
-    marginTop: 20,
-    width: "90%",
-    textAlign: "center",
-  },
 });
+
+
 export default styles;
