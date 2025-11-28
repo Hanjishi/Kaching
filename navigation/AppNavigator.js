@@ -10,7 +10,7 @@ import AddExpense from "../screens/AddExpense";
 import EditExpense from "../screens/EditExpense";
 import Summary from "../screens/Summary";
 import Savings from "../screens/Savings";
-
+import Profile from "../screens/Profile";
 
 
 const Stack = createNativeStackNavigator();
@@ -26,7 +26,7 @@ export default function AppNavigator() {
         />
         <Stack.Screen
           name="Login"
-          component={LoginScreen}a
+          component={LoginScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -35,6 +35,7 @@ export default function AppNavigator() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="ExpenseList" component={ExpenseList} />
         <Stack.Screen name="AddExpense" component={AddExpense} />
         <Stack.Screen name="EditExpense" component={EditExpense} />
