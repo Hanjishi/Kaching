@@ -6,11 +6,13 @@ import SignupScreen from "../screens/SignupScreen";
 import Splash from "../screens/Splash";
 import Home from "../screens/Home";
 import ExpenseList from "../screens/ExpenseList";
+import About from "../screens/About";
 import AddExpense from "../screens/AddExpense";
 import EditExpense from "../screens/EditExpense";
 import Summary from "../screens/Summary";
 import Savings from "../screens/Savings";
 import Profile from "../screens/Profile";
+import Settings from "../screens/Settings";
 
 
 const Stack = createNativeStackNavigator();
@@ -36,6 +38,8 @@ export default function AppNavigator() {
         />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="Settings" component={Settings} />
+        <Stack.Screen name="About" component={About} />
         <Stack.Screen name="ExpenseList" component={ExpenseList} />
         <Stack.Screen name="AddExpense" component={AddExpense} />
         <Stack.Screen name="EditExpense" component={EditExpense} />

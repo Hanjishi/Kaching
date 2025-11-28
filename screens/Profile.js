@@ -1,41 +1,111 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Profile() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [currency, setCurrency] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [loggedInEmail, setLoggedInEmail] = useState("");
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const currentUserEmail = await AsyncStorage.getItem("@logged_in_user");
+        setLoggedInEmail(currentUserEmail);
+
+        if (currentUserEmail) {
+          const savedProfile = await AsyncStorage.getItem(`@user_${currentUserEmail}_profile`);
+          if (savedProfile) {
+            const parsed = JSON.parse(savedProfile);
+            setName(parsed.name);
+            setEmail(parsed.email);
+            setPhone(parsed.phone || "");
+            setCurrency(parsed.currency || "PHP (₱)");
+            setAvatar(parsed.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png");
+          }
+        }
+      } catch (error) {
+        console.log("Error loading profile:", error);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const saveProfile = async () => {
+    if (!loggedInEmail) return;
+
+    const profileData = { name, email, phone, currency, avatar };
+    try {
+      await AsyncStorage.setItem(`@user_${loggedInEmail}_profile`, JSON.stringify(profileData));
+      Alert.alert("Profile Updated", "Your profile details were saved!");
+    } catch (error) {
+      Alert.alert("Error", "Failed to save profile.");
+    }
+  };
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setAvatar(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setAvatar(result.assets[0].uri);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.avatarContainer}>
-        <Image
-          source={{
-            uri: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-          }}
-          style={styles.avatar}
-        />
-      </View>
-      <Text style={styles.name}>HANJI</Text>
-      <Text style={styles.email}>hanji@gmail.com</Text>
+      <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
+        <Image source={{ uri: avatar }} style={styles.avatar} />
+        <Text style={styles.changePhotoText}>Change Photo</Text>
+      </TouchableOpacity>
 
-      {/* --- Profile Details Section --- */}
       <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>Profile Details</Text>
+        <Text style={styles.sectionTitle}>Edit Profile</Text>
 
-        {/* Detail Row 1: Phone */}
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Phone:</Text>
-          <Text style={styles.detailValue}>+63912345678</Text>
-        </View>
+        <Text style={styles.label}>Name</Text>
+        <TextInput style={styles.input} value={name} onChangeText={setName} />
 
-        {/* Detail Row 2: Member Since */}
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Member Since:</Text>
-          <Text style={styles.detailValue}>August 2023</Text>
-        </View>
+        <Text style={styles.label}>Email</Text>
+        <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
 
-        {/* Detail Row 3: Preferred Currency */}
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Currency:</Text>
-          <Text style={styles.detailValue}>PHP (₱)</Text>
-        </View>
+        <Text style={styles.label}>Phone</Text>
+        <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+
+        <Text style={styles.label}>Currency</Text>
+        <TextInput style={styles.input} value={currency} onChangeText={setCurrency} />
+
+        <TouchableOpacity style={styles.saveButton} onPress={saveProfile}>
+          <Text style={styles.saveButtonText}>Save Changes</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -44,75 +114,63 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
     backgroundColor: "#F4F7F9",
-    paddingTop: 50,
+    paddingTop: 40,
+    alignItems: "center",
   },
   avatarContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  avatar: {
     width: 130,
     height: 130,
     borderRadius: 65,
-    backgroundColor: "#fff",
-    padding: 5,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 4,
+    borderWidth: 4,
+    borderColor: "#fff",
   },
-  avatar: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 60,
-  },
-  name: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#2C3E50",
-    marginBottom: 5,
-  },
-  email: {
-    fontSize: 16,
-    color: "#7F8C8D",
-    fontWeight: "400",
-    marginBottom: 30,
+  changePhotoText: {
+    marginTop: 10,
+    color: "#3498DB",
+    fontSize: 14,
+    fontWeight: "500",
   },
   detailsCard: {
-    width: '90%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    width: "90%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
     elevation: 2,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#34495E",
+    fontWeight: "700",
     marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ECF0F1',
-    paddingBottom: 8,
+    color: "#34495E",
   },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F4F7F9',
-  },
-  detailLabel: {
-    fontSize: 15,
+  label: {
+    marginTop: 10,
+    fontSize: 14,
     color: "#7F8C8D",
-    fontWeight: '500',
   },
-  detailValue: {
+  input: {
+    backgroundColor: "#F0F3F4",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 5,
     fontSize: 15,
     color: "#2C3E50",
-    fontWeight: '600',
-  }
+  },
+  saveButton: {
+    backgroundColor: "#2ECC71",
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
 });

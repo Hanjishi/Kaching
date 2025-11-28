@@ -15,7 +15,7 @@ export default StyleSheet.create({
     alignItems: "center",
     alignSelf: "stretch",
     justifyContent: "space-between",
-    marginTop: 40,
+    marginTop: -10,
     marginBottom: 15,
   },
   profileLeft: {
@@ -37,7 +37,7 @@ export default StyleSheet.create({
   },
   menuDropdown: {
     position: "absolute",
-    top: 115,
+    top: 70,
     right: 15,
     backgroundColor: "#fff",
     borderRadius: 10,

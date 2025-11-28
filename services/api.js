@@ -1,64 +1,47 @@
-import Expense from "../models/Expense";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// 🧾 Local dummy data
-let dummyExpenses = [
-  new Expense(1, 235, "Food", "2025-09-21", "Lunch at cafe"),
-  new Expense(2, 120, "Transportation", "2025-09-20", "Grab ride"),
-  new Expense(3, 80, "Shopping", "2025-09-19", "T-shirt"),
-  new Expense(4, 1600, "Utilities", "2025-09-25", "Wi-Fi bill"),
-  new Expense(5, 700, "Food", "2025-09-26", "Groceries"),
-  new Expense(6, 499, "Shopping", "2025-09-27", "Shoes"),
-  new Expense(7, 40, "Transportation", "2025-09-28", "Jeepney fare"),
-  new Expense(8, 150, "Food", "2025-09-30", "Dinner at restaurant"),
-];
-
-// 💰 Local savings data
-let savingsProgress = 0.45; // 45% of goal
-let savingsGoal = 10000; // Example goal in pesos
-
-// 💡 Local motivational tips
-const tips = [
-  "Save at least 20% of your income each month.",
-  "Track your expenses daily to avoid overspending.",
-  "Cook meals at home instead of eating out.",
-  "Set a budget and stick to it.",
-  "Avoid impulse buying—wait 24 hours before big purchases.",
-  "Invest in needs, not wants.",
-  "Automate your savings every payday.",
-  "Cut down subscriptions you rarely use.",
-  "Compare prices before buying big-ticket items.",
-  "Review your spending habits weekly.",
-];
-
-// 🧮 Expenses CRUD
-export async function getExpenses() {
-  return dummyExpenses;
+// Expenses
+export async function getExpenses(userEmail) {
+  const data = await AsyncStorage.getItem(`@${userEmail}_expenses`);
+  return data ? JSON.parse(data) : [];
 }
 
-export async function addExpense(expense) {
-  dummyExpenses.push(expense);
+export async function addExpense(userEmail, expense) {
+  const current = await getExpenses(userEmail);
+  const updated = [...current, expense];
+  await AsyncStorage.setItem(`@${userEmail}_expenses`, JSON.stringify(updated));
 }
 
-export async function updateExpense(updated) {
-  dummyExpenses = dummyExpenses.map((e) =>
-    e.id === updated.id ? updated : e
-  );
+export async function updateExpense(userEmail, updatedExpense) {
+  const current = await getExpenses(userEmail);
+  const updated = current.map(e => (e.id === updatedExpense.id ? updatedExpense : e));
+  await AsyncStorage.setItem(`@${userEmail}_expenses`, JSON.stringify(updated));
 }
 
-export async function deleteExpense(id) {
-  dummyExpenses = dummyExpenses.filter((e) => e.id !== id);
+export async function deleteExpense(userEmail, id) {
+  const current = await getExpenses(userEmail);
+  const updated = current.filter(e => e.id !== id);
+  await AsyncStorage.setItem(`@${userEmail}_expenses`, JSON.stringify(updated));
 }
 
-// 💰 Savings functions
-export async function getSavingsProgress() {
-  return { progress: savingsProgress, goal: savingsGoal };
+// Savings
+export async function getSavings(userEmail) {
+  const balance = await AsyncStorage.getItem(`@${userEmail}_savingsBalance`);
+  const goal = await AsyncStorage.getItem(`@${userEmail}_savingsGoal`);
+  return {
+    balance: balance ? parseFloat(balance) : 0,
+    goal: goal ? JSON.parse(goal) : null
+  };
 }
 
-export async function updateSavingsProgress(newProgress) {
-  savingsProgress = newProgress;
-  return { progress: savingsProgress };
+export async function updateSavingsBalance(userEmail, balance) {
+  await AsyncStorage.setItem(`@${userEmail}_savingsBalance`, balance.toString());
 }
 
-export async function getMotivationalTips() {
-  return tips;
+export async function updateSavingsGoal(userEmail, goal) {
+  if (!goal) {
+    await AsyncStorage.removeItem(`@${userEmail}_savingsGoal`);
+  } else {
+    await AsyncStorage.setItem(`@${userEmail}_savingsGoal`, JSON.stringify(goal));
+  }
 }
