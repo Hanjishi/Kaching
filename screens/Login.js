@@ -28,14 +28,17 @@ export default function LoginScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#6B7280"
         value={email}
         onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="#6B7280"
         secureTextEntry
         value={password}
+        valueTextColor="#6B7280"
         onChangeText={setPassword}
       />
 

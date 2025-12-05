@@ -14,6 +14,7 @@ export default function ProfileForm({ profile, setProfile, onSave,}) {
       <TextInput
         style={styles.input}
         placeholder="Full Name"
+        placeholderTextColor="#6B7280"
         value={profile.name}
         onChangeText={(t) => setProfile(prev => ({ ...prev, name: t }))}
       />
@@ -26,7 +27,8 @@ export default function ProfileForm({ profile, setProfile, onSave,}) {
       />
       <TextInput
         style={styles.input}
-        placeholder="Phone"
+        placeholder="Phone Number"
+        placeholderTextColor="#6B7280"
         value={profile.phone}
         onChangeText={(t) => setProfile(prev => ({ ...prev, phone: t }))}
         keyboardType="phone-pad"

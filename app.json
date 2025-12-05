@@ -2,13 +2,13 @@
   "expo": {
     "name": "Kaching",
     "slug": "Kaching",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/kaching_logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/kaching_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
