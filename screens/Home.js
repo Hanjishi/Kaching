@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, TouchableOpacity, Image, Alert } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
-import * as Progress from "react-native-progress";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getExpenses } from "../services/api";
+import React, { useEffect, useState } from "react";
+import { View, Text, Alert } from "react-native";
+import { supabase } from "../services/supabase";
+import NetInfo from "@react-native-community/netinfo";
 import styles from "../styles/HomeStyles";
+import { pushAllLocalDataToCloud } from "../services/syncService";
+import ProfileHeader from "../components/ProfileHeader";
+import BudgetInput from "../components/BudgetInput";
+import FeatureCards from "../components/FeatureCards";
+import TipBox from "../components/TipBox";
+import SavingsProgress from "../components/SavingsProgress";
 
 export default function Home({ navigation }) {
   const tips = [
@@ -25,145 +28,129 @@ export default function Home({ navigation }) {
   const [advice, setAdvice] = useState("");
   const [menuVisible, setMenuVisible] = useState(false);
   const [monthlyBudget, setMonthlyBudget] = useState("0.00");
-  const [expenses, setExpenses] = useState([]);
-  const [inputBudget, setInputBudget] = useState("");
+  const [savingsGoal, setSavingsGoal] = useState(0);
   const [savingsBalance, setSavingsBalance] = useState(0);
-  const [savingsGoal, setSavingsGoal] = useState(null);
   const [userEmail, setUserEmail] = useState("");
-
-  const fetchExpenses = async () => {
-    try {
-      const data = await getExpenses();
-      setExpenses(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [userId, setUserId] = useState("");
+  const [saveError, setSaveError] = useState(null);
 
   const loadData = async () => {
     try {
-      const currentUserEmail = await AsyncStorage.getItem("@logged_in_user");
-      if (!currentUserEmail) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return navigation.replace("Login");
 
-      setUserEmail(currentUserEmail);
+      const uid = session.user.id;
+      const email = session.user.email;
 
-      const savedProfile = await AsyncStorage.getItem(`@user_${currentUserEmail}_profile`);
-      if (savedProfile) setProfile(JSON.parse(savedProfile));
+      setUserId(uid);
+      setUserEmail(email);
 
-      const savedBudget = await AsyncStorage.getItem(`@monthlyBudget_${currentUserEmail}`);
-      if (savedBudget) setMonthlyBudget(savedBudget);
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles_backup")
+        .select("name, avatar")
+        .eq("email", email)
+        .maybeSingle();
 
-      const savedBalance = await AsyncStorage.getItem(`@${currentUserEmail}_savingsBalance`);
-      setSavingsBalance(savedBalance ? parseFloat(savedBalance) : 0);
+      if (profileError) console.error("Profile fetch error:", profileError);
+      else if (profileData) setProfile(profileData);
 
-      const goalData = await AsyncStorage.getItem(`@${currentUserEmail}_savingsGoal`);
-      if (goalData) setSavingsGoal(JSON.parse(goalData));
+      const { data: savingsData, error: savingsError } = await supabase
+        .from("savings_backup")
+        .select("balance, goal")
+        .eq("user_id", uid)
+        .maybeSingle();
+      if (savingsError) console.error("Savings fetch error:", savingsError);
+      else {
+        setSavingsBalance(savingsData?.balance || 0);
+        setSavingsGoal(savingsData?.goal || null);
+      }
 
-      fetchExpenses();
-    } catch (error) {
-      console.error(error);
+      const { data: budgetData, error: budgetError } = await supabase
+        .from("budgets_backup")
+        .select("amount")
+        .eq("user_id", uid)
+        .maybeSingle();
+
+      if (budgetError) console.error("Budget fetch error:", budgetError);
+      else setMonthlyBudget(budgetData?.amount?.toString() || "0.00");
+    } catch (err) {
+      console.error("loadData error:", err);
     }
   };
 
   useEffect(() => {
     loadData();
-    const unsubscribe = navigation.addListener("focus", () => {
-      loadData();
-    });
+    setAdvice(tips[Math.floor(Math.random() * tips.length)]);
+
+    const unsubscribe = navigation.addListener("focus", loadData);
     return unsubscribe;
   }, [navigation]);
 
-  const handleSaveBudget = async () => {
-    if (!inputBudget) {
-      Alert.alert("Error", "Please enter a budget.");
+  const saveBudgetToSupabase = async (budgetAmount) => {
+    if (!userId) {
+      Alert.alert("Error", "User ID not found");
       return;
     }
-    setMonthlyBudget(inputBudget);
-    if (userEmail) {
-      await AsyncStorage.setItem(`@monthlyBudget_${userEmail}`, inputBudget);
+
+    const parsedAmount = parseFloat(budgetAmount);
+    if (isNaN(parsedAmount)) {
+      Alert.alert("Error", "Invalid budget amount. Please enter a number.");
+      return;
     }
-    setInputBudget("");
+
+    try {
+      const { error } = await supabase
+        .from("budgets_backup")
+        .upsert(
+          { user_id: userId, amount: parsedAmount },
+          { onConflict: ["user_id"] }
+        );
+
+      if (error) {
+        console.error("Budget save error:", error);
+        Alert.alert("Error", "Failed to save budget");
+        setSaveError(error.message);
+      } else {
+        setMonthlyBudget(parsedAmount.toString());
+        setSaveError(null);
+        Alert.alert("Success", "Budget updated successfully");
+      }
+    } catch (err) {
+      console.error("saveBudgetToSupabase error:", err);
+      Alert.alert("Error", "Failed to save budget");
+      setSaveError(err.message);
+    }
   };
 
-  useEffect(() => {
-    setAdvice(tips[Math.floor(Math.random() * tips.length)]);
-  }, []);
+  const handleBudgetChange = (newBudget) => {
+    setMonthlyBudget(newBudget);
+    saveBudgetToSupabase(newBudget);
+  };
 
-  const goalProgress =
-    savingsGoal && savingsGoal.amount > 0
-      ? Math.min(savingsBalance / savingsGoal.amount, 1)
-      : 0;
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigation.replace("Login");
+  };
+
+  const handleBackupNow = async () => {
+    const net = await NetInfo.fetch();
+    if (!net.isConnected) {
+      return Alert.alert("No Internet", "Connect to internet to backup data.");
+    }
+    const res = await pushAllLocalDataToCloud();
+    Alert.alert(res.success ? "Backup Complete" : "Backup Failed", res.error || "");
+  };
 
   return (
     <View style={styles.container}>
-      {/* Profile */}
-      <View style={styles.profileContainer}>
-        <View style={styles.profileLeft}>
-          <Image
-            source={{
-              uri:
-                profile.avatar && profile.avatar.length > 0
-                  ? profile.avatar
-                  : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-            }}
-            style={styles.profileImage}
-          />
-          <Text style={styles.userName}>{profile.name || "User"}</Text>
-        </View>
-
-        <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-          <Ionicons name="menu" size={28} color="#333" />
-        </TouchableOpacity>
-      </View>
-
-      {menuVisible && (
-        <View style={styles.menuDropdown}>
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => {
-              setMenuVisible(false);
-              navigation.navigate("Profile");
-            }}
-          >
-            <Ionicons name="person-outline" size={18} color="#555" />
-            <Text style={styles.menuText}>Profile</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => {
-              setMenuVisible(false);
-              navigation.navigate("Settings");
-            }}
-          >
-            <Ionicons name="settings-outline" size={18} color="#555" />
-            <Text style={styles.menuText}>Settings</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => {
-              setMenuVisible(false);
-              navigation.navigate("About");
-            }}
-          >
-            <Ionicons name="information-circle-outline" size={18} color="#555" />
-            <Text style={styles.menuText}>About</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={async () => {
-              setMenuVisible(false);
-              await AsyncStorage.removeItem("@logged_in_user");
-              navigation.replace("Login");
-            }}
-          >
-            <Ionicons name="log-out-outline" size={18} color="#555" />
-            <Text style={styles.menuText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <ProfileHeader
+        profile={profile}
+        menuVisible={menuVisible}
+        setMenuVisible={setMenuVisible}
+        navigation={navigation}
+        handleLogout={handleLogout}
+        handleBackupNow={handleBackupNow}
+      />
 
       <Text style={styles.title}>Kaching</Text>
       <Text style={styles.subtitle}>Smart Budget & Expense Tracker</Text>
@@ -172,68 +159,20 @@ export default function Home({ navigation }) {
         Current Monthly Budget: ₱{monthlyBudget}
       </Text>
 
-      <View style={{ flexDirection: "row", marginBottom: 20 }}>
-        <TextInput
-          style={{ borderWidth: 1, flex: 1, marginRight: 10, padding: 8, borderRadius: 5 }}
-          placeholder="Enter new budget"
-          keyboardType="numeric"
-          value={inputBudget}
-          onChangeText={setInputBudget}
-        />
-        <Button title="Save" onPress={handleSaveBudget} />
-      </View>
+      <BudgetInput
+        userEmail={userEmail}
+        monthlyBudget={monthlyBudget}
+        setMonthlyBudget={handleBudgetChange}
+      />
 
-      {/* Feature Cards */}
-      <View style={styles.cardContainer}>
-        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("ExpenseList")}>
-          <Ionicons name="list" size={30} color="#4CAF50" />
-          <Text style={styles.cardText}>Expenses</Text>
-        </TouchableOpacity>
+      <FeatureCards navigation={navigation} />
 
-        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("AddExpense")}>
-          <Ionicons name="add-circle-outline" size={30} color="#2196F3" />
-          <Text style={styles.cardText}>Add Expense</Text>
-        </TouchableOpacity>
+      <SavingsProgress 
+        savingsGoal={savingsGoal}
+        savingsBalance={savingsBalance}
+      />
 
-        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("Savings")}>
-          <FontAwesome5 name="piggy-bank" size={30} color="#9C27B0" />
-          <Text style={styles.cardText}>Savings</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate("Summary")}>
-          <Ionicons name="stats-chart-outline" size={30} color="#FF9800" />
-          <Text style={styles.cardText}>Summary</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.progressContainer}>
-        <Text style={styles.progressTitle}>Savings Goal</Text>
-        {savingsGoal ? (
-          <>
-            <Progress.Bar
-              progress={goalProgress}
-              width={250}
-              color="#9C27B0"
-              borderRadius={10}
-              height={15}
-              animated
-            />
-            <Text style={styles.progressText}>
-              ₱{savingsBalance.toFixed(2)} / ₱{savingsGoal.amount.toFixed(2)} ({Math.round(goalProgress * 100)}%)
-            </Text>
-          </>
-        ) : (
-          <Text style={styles.progressText}>No savings goal set yet</Text>
-        )}
-      </View>
-
-      <TouchableOpacity
-        style={styles.tipBox}
-        onPress={() => setAdvice(tips[Math.floor(Math.random() * tips.length)])}
-      >
-        <Text style={styles.tipText}>💡 Tip: {advice}</Text>
-        <Text style={styles.tipHint}>(Tap for another tip)</Text>
-      </TouchableOpacity>
+      <TipBox advice={advice} setAdvice={setAdvice} tips={tips} />
     </View>
   );
 }

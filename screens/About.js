@@ -1,31 +1,41 @@
 import React from "react";
-import { View, Text, ScrollView } from "react-native";
-import styles from "../styles/Theme";
+import { ScrollView, Text } from "react-native";
+import aboutStyles from "../styles/AboutStyles";
 
 export default function About() {
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>ℹ️ About Kaching</Text>
+    <ScrollView contentContainerStyle={aboutStyles.container}>
+      
+      <Text style={aboutStyles.title}>ℹ️ About Kaching</Text>
+      <Text style={aboutStyles.subtitle}>Version 1.0.0</Text>
 
-      <Text style={styles.subtitle}>Version 1.0.0</Text>
-
-      <Text style={styles.paragraph}>
-        Kaching is a <Text style={{ fontWeight: "600" }}>smart expense and savings tracker</Text> 
-        designed to help users manage their daily spending, monitor savings, and stay financially aware.
+      <Text style={aboutStyles.paragraph}>
+        <Text style={{ fontWeight: "600" }}>Kaching</Text> is a Smart Budget 
+        and Expense tracker that helps users manage daily spending and stay
+        financially aware.
       </Text>
 
-      <Text style={styles.paragraph}>
-        Record expenses, view summaries, analyze trends, and plan better with a 
-        <Text style={{ fontWeight: "600" }}> clean and user-friendly interface</Text>.
+      <Text style={aboutStyles.paragraph}>
+        Record expenses, view summaries, analyze trends, and plan smarter with
+        a clean and user-friendly interface.
       </Text>
 
-      <Text style={styles.paragraph}>
-        Developed by: <Text style={{ fontWeight: "600" }}>Kaching Team</Text>
+      <Text style={aboutStyles.subtitle}>👥 Development Team</Text>
+
+      <Text style={aboutStyles.teamLead}>
+        Team Lead: <Text style={{ fontWeight: "700" }}>Dalisay, John H.</Text>
       </Text>
 
-      <Text style={styles.note}>
-        © 2025 Kaching. All rights reserved.
-      </Text>
+      <Text style={aboutStyles.teamItem}>• Umbao, Adrian</Text>
+      <Text style={aboutStyles.teamItem}>• Gulapo, Jhammes Leigh T.</Text>
+      <Text style={aboutStyles.teamItem}>• Comedido, Kimberly C.</Text>
+      <Text style={aboutStyles.teamItem}> • Dibdib, Althia Lhorine Xenieth V.</Text>
+      <Text style={aboutStyles.teamItem}>• Sultan, Mark Rey V.</Text>
+      <Text style={aboutStyles.teamItem}>• Raterta, Kyle Ichtus</Text>
+      <Text style={aboutStyles.teamItem}>• Yuson, Alessandra Xantipi T.</Text>
+
+      <Text style={aboutStyles.note}>© 2025 Kaching. All rights reserved.</Text>
+
     </ScrollView>
   );
 }

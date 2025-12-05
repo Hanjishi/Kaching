@@ -1,34 +1,46 @@
 import React from "react";
 import { View, Alert } from "react-native";
 import ExpenseForm from "../components/ExpenseForm";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import styles from "../styles/Theme";
+import { supabase } from "../services/supabase";
 
 export default function AddExpense({ navigation }) {
-  const handleSubmit = async (expense) => {
+  const handleSubmit = async (values) => {
     try {
-      const userEmail = await AsyncStorage.getItem("@logged_in_user");
-      if (!userEmail) {
-        Alert.alert("Error", "No logged-in user found.");
-        return;
+      const { data: { session } } = await supabase.auth.getSession();
+      const email = session?.user?.email;
+      if (!email) return navigation.replace("Login");
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles_backup")
+        .select("user_id")
+        .eq("email", email)
+        .single();
+
+      if (profileError || !profile) {
+        throw new Error("User profile not found.");
       }
 
-      const storedExpenses = await AsyncStorage.getItem(`@${userEmail}_expenses`);
-      const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
+      const { error } = await supabase.from("expenses_backup").insert([{
+        user_id: profile.user_id,
+        title: values.description || "Expense",
+        amount: values.amount,
+        category: values.category,
+        date: values.date,
+        description: values.description,
+        backed_at: new Date().toISOString(),
+      }]);
 
-      const newExpense = { id: Date.now(), ...expense };
-      const updatedExpenses = [...expenses, newExpense];
+      if (error) throw error;
 
-      await AsyncStorage.setItem(`@${userEmail}_expenses`, JSON.stringify(updatedExpenses));
-      navigation.goBack();
-    } catch (error) {
-      console.error("Error saving expense:", error);
-      Alert.alert("Error", "Failed to save expense.");
+      navigation.replace("ExpenseList");
+    } catch (err) {
+      console.error("AddExpense error", err);
+      Alert.alert("Error", err.message || "Failed to add expense.");
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, padding: 20 }}>
       <ExpenseForm onSubmit={handleSubmit} />
     </View>
   );

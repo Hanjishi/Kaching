@@ -1,176 +1,108 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "../services/supabase";
+import ProfileForm from "../components/ProfileForm";
 
-export default function Profile() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [currency, setCurrency] = useState("");
-  const [avatar, setAvatar] = useState("");
-  const [loggedInEmail, setLoggedInEmail] = useState("");
+export default function ProfileScreen() {
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    currency: "PHP (₱)",
+    avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const currentUserEmail = await AsyncStorage.getItem("@logged_in_user");
-        setLoggedInEmail(currentUserEmail);
-
-        if (currentUserEmail) {
-          const savedProfile = await AsyncStorage.getItem(`@user_${currentUserEmail}_profile`);
-          if (savedProfile) {
-            const parsed = JSON.parse(savedProfile);
-            setName(parsed.name);
-            setEmail(parsed.email);
-            setPhone(parsed.phone || "");
-            setCurrency(parsed.currency || "PHP (₱)");
-            setAvatar(parsed.avatar || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png");
-          }
-        }
-      } catch (error) {
-        console.log("Error loading profile:", error);
-      }
-    };
-
     loadProfile();
   }, []);
 
-  const saveProfile = async () => {
-    if (!loggedInEmail) return;
-
-    const profileData = { name, email, phone, currency, avatar };
+  const loadProfile = async () => {
     try {
-      await AsyncStorage.setItem(`@user_${loggedInEmail}_profile`, JSON.stringify(profileData));
-      Alert.alert("Profile Updated", "Your profile details were saved!");
-    } catch (error) {
-      Alert.alert("Error", "Failed to save profile.");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.email) return;
+
+      const email = session.user.email;
+
+      const { data } = await supabase
+        .from("profiles_backup")
+        .select("*")
+        .eq("email", email)
+        .single();
+
+      setProfile(data ? { ...data, email } : prev => ({ ...prev, email }));
+    } catch (err) {
+      console.error("Load profile error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+  const chooseImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") return Alert.alert("Permission required", "Allow access to your gallery.");
 
-    if (!result.canceled) {
-      setAvatar(result.assets[0].uri);
-    }
+    const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [1,1], quality: 0.7 });
+    if (!result.canceled) uploadAvatar(result.assets[0].uri);
   };
 
   const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") return Alert.alert("Permission required", "Allow access to your camera.");
 
-    if (!result.canceled) {
-      setAvatar(result.assets[0].uri);
+    const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1,1], quality: 0.7 });
+    if (!result.canceled) uploadAvatar(result.assets[0].uri);
+  };
+
+  const uploadAvatar = async (uri) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session.user;
+      if (!user) throw new Error("User not logged in");
+
+      const fileExt = uri.split(".").pop().toLowerCase();
+      const fileName = `${user.id}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, await fetch(uri).then(r => r.blob()), { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      setProfile(prev => ({ ...prev, avatar: urlData.publicUrl }));
+    } catch (err) {
+      Alert.alert("Upload Error", err.message);
     }
   };
 
+  const saveProfile = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return Alert.alert("Error", "User not logged in");
+
+      const profileToSave = { user_id: session.user.id, ...profile };
+      const { error } = await supabase.from("profiles_backup").upsert(profileToSave, { onConflict: ["user_id"] });
+      if (error) throw error;
+
+      Alert.alert("Saved", "Profile updated successfully.");
+    } catch (err) {
+      console.error("Save profile error:", err);
+      Alert.alert("Error", err.message);
+    }
+  };
+
+  if (loading) return <Text style={{ textAlign: "center", marginTop: 50 }}>Loading profile...</Text>;
+
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
-        <Image source={{ uri: avatar }} style={styles.avatar} />
-        <Text style={styles.changePhotoText}>Change Photo</Text>
-      </TouchableOpacity>
-
-      <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>Edit Profile</Text>
-
-        <Text style={styles.label}>Name</Text>
-        <TextInput style={styles.input} value={name} onChangeText={setName} />
-
-        <Text style={styles.label}>Email</Text>
-        <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
-
-        <Text style={styles.label}>Phone</Text>
-        <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-
-        <Text style={styles.label}>Currency</Text>
-        <TextInput style={styles.input} value={currency} onChangeText={setCurrency} />
-
-        <TouchableOpacity style={styles.saveButton} onPress={saveProfile}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <ProfileForm
+      profile={profile}
+      setProfile={setProfile}
+      onSave={saveProfile}
+      onChooseImage={chooseImage}
+      onTakePhoto={takePhoto}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F4F7F9",
-    paddingTop: 40,
-    alignItems: "center",
-  },
-  avatarContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  avatar: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    borderWidth: 4,
-    borderColor: "#fff",
-  },
-  changePhotoText: {
-    marginTop: 10,
-    color: "#3498DB",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  detailsCard: {
-    width: "90%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 15,
-    color: "#34495E",
-  },
-  label: {
-    marginTop: 10,
-    fontSize: 14,
-    color: "#7F8C8D",
-  },
-  input: {
-    backgroundColor: "#F0F3F4",
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 5,
-    fontSize: 15,
-    color: "#2C3E50",
-  },
-  saveButton: {
-    backgroundColor: "#2ECC71",
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 20,
-    alignItems: "center",
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-});

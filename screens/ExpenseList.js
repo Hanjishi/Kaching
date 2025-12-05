@@ -1,28 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getExpenses } from "../services/api";
 import ExpenseItem from "../components/ExpenseItem";
+import { pullAllDataFromSupabase } from "../services/syncService";
 
 export default function ExpenseList({ navigation }) {
   const [expenses, setExpenses] = useState([]);
-  const [monthlyBudget, setMonthlyBudget] = useState("0.00");
-  const [userEmail, setUserEmail] = useState("");
+  const [monthlyBudget, setMonthlyBudget] = useState(0);
+
+  const loadData = async () => {
+    const result = await pullAllDataFromSupabase();
+    if (!result.success) {
+      console.error("Failed to load data:", result.error);
+      return navigation.replace("Login");
+    }
+
+    setExpenses(result.expenses || []);
+    setMonthlyBudget(result.budget || 0);
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      const email = await AsyncStorage.getItem("@logged_in_user");
-      if (!email) return;
-      setUserEmail(email);
-
-      const savedBudget = await AsyncStorage.getItem(`@monthlyBudget_${email}`);
-      if (savedBudget) setMonthlyBudget(savedBudget);
-
-      const data = await getExpenses(email);
-      setExpenses(data);
-    };
     loadData();
-  }, []);
+    const unsubscribe = navigation.addListener("focus", loadData);
+    return unsubscribe;
+  }, [navigation]);
 
   const totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
   const remainingBalance = parseFloat(monthlyBudget || 0) - totalExpenses;
@@ -35,26 +35,15 @@ export default function ExpenseList({ navigation }) {
 
       <FlatList
         data={expenses}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ExpenseItem
-            expense={item}
-            onPress={() => navigation.navigate("EditExpense", { expense: item })}
-          />
+          <ExpenseItem expense={item} onPress={() => navigation.navigate("EditExpense", { expense: item })} />
         )}
       />
 
       <View style={{ marginTop: 20, padding: 15, borderTopWidth: 1, borderColor: "#ccc" }}>
-        <Text style={{ fontSize: 16, fontWeight: "600" }}>
-          Total Expenses: ₱{totalExpenses.toFixed(2)}
-        </Text>
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: "600",
-            color: remainingBalance < 0 ? "red" : "green",
-          }}
-        >
+        <Text style={{ fontSize: 16, fontWeight: "600" }}>Total Expenses: ₱{totalExpenses.toFixed(2)}</Text>
+        <Text style={{ fontSize: 16, fontWeight: "600", color: remainingBalance < 0 ? "red" : "green" }}>
           Remaining Balance: ₱{remainingBalance.toFixed(2)}
         </Text>
       </View>

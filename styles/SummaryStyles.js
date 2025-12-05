@@ -1,47 +1,69 @@
 import { StyleSheet } from "react-native";
-import Theme from "./Theme";
 
 export default StyleSheet.create({
-  ...Theme,
-
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    padding: 20,
   },
+
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#2e7d32",
     textAlign: "center",
-    marginBottom: 15,
+    marginTop: 10,
   },
+
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
-    color: "#555",
     marginBottom: 10,
+    textAlign: "center",
   },
-  card: {
+
+  loadingText: {
+    textAlign: "center",
+    marginTop: 50,
+  },
+
+  chartBlock: {
+    marginTop: 30,
+    alignItems: "center",
+  },
+
+  chart: {
+    borderRadius: 10,
+  },
+
+  listItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 15,
     backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 15,
     marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
   },
+
   category: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
   },
+
   amount: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#2e7d32",
+  },
+
+  totalCard: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: "#f0f8ff",
+    borderRadius: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  totalText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#388e3c",
   },
 });

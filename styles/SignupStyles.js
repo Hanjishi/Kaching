@@ -2,49 +2,46 @@ import { StyleSheet } from "react-native";
 import Theme from "./Theme";
 
 export default StyleSheet.create({
-  ...Theme, // reuse any shared base styles if needed
-
   container: { 
     flex: 1, 
+    padding: 25, 
     justifyContent: "center", 
-    alignItems: "center", 
-    padding: 20, 
-    backgroundColor: "#fff", 
+  },
+  logo: {
+    width: 220,
+    height: 220,
+    marginBottom: 25,
+    alignSelf: "center",
+    resizeMode: "contain",
   },
   title: { 
     fontSize: 28, 
     fontWeight: "bold", 
-    color: "#9C27B0", 
-  },
-  subtitle: { 
-    fontSize: 16, 
-    color: "#666", 
     marginBottom: 30, 
-  },
+    textAlign: "center" },
   input: { 
-    width: "100%", 
-    borderWidth: 1, 
-    borderColor: "#ccc", 
-    borderRadius: 10, 
+    backgroundColor: "#fff", 
     padding: 12, 
+    borderRadius: 8, 
     marginBottom: 15, 
-    backgroundColor: "#f9f9f9",
+    borderWidth: 1, 
+    borderColor: "#ccc" 
   },
   button: { 
     backgroundColor: "#9C27B0", 
-    paddingVertical: 12, 
+    padding: 15, 
     borderRadius: 10, 
-    width: "100%", 
     alignItems: "center", 
+    marginTop: 10 
   },
   buttonText: { 
     color: "#fff", 
     fontSize: 16, 
-    fontWeight: "bold", 
+    fontWeight: "bold" 
   },
   link: { 
-    marginTop: 15, 
+    marginTop: 20, 
     color: "#9C27B0", 
-    fontWeight: "500", 
+    textAlign: "center" 
   },
 });

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Button, Alert } from "react-native";
 import ExpenseForm from "../components/ExpenseForm";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "../services/supabase";
 import styles from "../styles/Theme";
 
 export default function EditExpense({ route, navigation }) {
@@ -9,20 +9,13 @@ export default function EditExpense({ route, navigation }) {
 
   const handleUpdate = async (updated) => {
     try {
-      const userEmail = await AsyncStorage.getItem("@logged_in_user");
-      if (!userEmail) return;
-
-      const storedExpenses = await AsyncStorage.getItem(`@${userEmail}_expenses`);
-      const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
-
-      const updatedExpenses = expenses.map((e) =>
-        e.id === expense.id ? { ...e, ...updated } : e
-      );
-
-      await AsyncStorage.setItem(`@${userEmail}_expenses`, JSON.stringify(updatedExpenses));
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { error } = await supabase.from("expenses_backup").update(updated).eq("id", expense.id);
+      if (error) throw error;
       navigation.goBack();
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       Alert.alert("Error", "Failed to update the expense.");
     }
   };
@@ -30,26 +23,22 @@ export default function EditExpense({ route, navigation }) {
   const handleDelete = async () => {
     Alert.alert("Delete Expense", "Are you sure you want to delete this expense?", [
       { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
+      { 
+        text: "Delete", 
+        style: "destructive", 
         onPress: async () => {
           try {
-            const userEmail = await AsyncStorage.getItem("@logged_in_user");
-            if (!userEmail) return;
-
-            const storedExpenses = await AsyncStorage.getItem(`@${userEmail}_expenses`);
-            const expenses = storedExpenses ? JSON.parse(storedExpenses) : [];
-
-            const updatedExpenses = expenses.filter((e) => e.id !== expense.id);
-            await AsyncStorage.setItem(`@${userEmail}_expenses`, JSON.stringify(updatedExpenses));
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+            const { error } = await supabase.from("expenses_backup").delete().eq("id", expense.id);
+            if (error) throw error;
             navigation.goBack();
-          } catch (error) {
-            console.error(error);
+          } catch (err) {
+            console.error(err);
             Alert.alert("Error", "Failed to delete the expense.");
           }
-        },
-      },
+        }
+      }
     ]);
   };
 

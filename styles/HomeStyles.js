@@ -37,8 +37,8 @@ export default StyleSheet.create({
   },
   menuDropdown: {
     position: "absolute",
-    top: 70,
-    right: 15,
+    top: 21,
+    right: 30,
     backgroundColor: "#fff",
     borderRadius: 10,
     elevation: 5,

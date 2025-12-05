@@ -1,20 +1,23 @@
 import React, { useState } from "react";
-import { View, TextInput, Button } from "react-native";
+import { View, TextInput, Button, TouchableOpacity, Text, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import styles from "../styles/Theme";
 
 export default function ExpenseForm({ onSubmit, initialValues }) {
   const [amount, setAmount] = useState(initialValues?.amount?.toString() || "");
   const [category, setCategory] = useState(initialValues?.category || "Other");
-  const [date, setDate] = useState(initialValues?.date || "");
+  const [date, setDate] = useState(
+    initialValues?.date ? new Date(initialValues.date) : new Date()
+  );
   const [description, setDescription] = useState(initialValues?.description || "");
+  const [showPicker, setShowPicker] = useState(false);
 
   const handleSubmit = () => {
-    if (!amount || !category || !date) return;
     onSubmit({
       amount: parseFloat(amount),
       category: category.trim().toLowerCase(),
-      date,
+      date: date.toISOString().split("T")[0],
       description,
     });
   };
@@ -44,12 +47,26 @@ export default function ExpenseForm({ onSubmit, initialValues }) {
         </Picker>
       </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Date (YYYY-MM-DD)"
-        value={date}
-        onChangeText={setDate}
-      />
+      {/* Date Picker Input */}
+      <TouchableOpacity
+        style={[styles.input, { justifyContent: "center" }]}
+        onPress={() => setShowPicker(true)}
+      >
+        <Text>{date.toISOString().split("T")[0]}</Text>
+      </TouchableOpacity>
+
+      {showPicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={(event, selectedDate) => {
+            setShowPicker(false);
+            if (selectedDate) setDate(selectedDate);
+          }}
+        />
+      )}
+
       <TextInput
         style={styles.input}
         placeholder="Description"

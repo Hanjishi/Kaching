@@ -1,8 +1,8 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import LoginScreen from "../screens/LoginScreen";
-import SignupScreen from "../screens/SignupScreen";
+import LoginScreen from "../screens/Login";
+import SignupScreen from "../screens/Signup";
 import Splash from "../screens/Splash";
 import Home from "../screens/Home";
 import ExpenseList from "../screens/ExpenseList";
@@ -13,6 +13,7 @@ import Summary from "../screens/Summary";
 import Savings from "../screens/Savings";
 import Profile from "../screens/Profile";
 import Settings from "../screens/Settings";
+import 'react-native-url-polyfill/auto';
 
 
 const Stack = createNativeStackNavigator();

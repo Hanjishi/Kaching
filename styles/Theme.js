@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
   form: {
     padding: 16,
     backgroundColor: "#fff",
+    alignContent: "center",
     borderRadius: 12,
     elevation: 2,
   },
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
 
   pickerContainer: {
   borderWidth: 1,
-  borderColor: "#ccc",
+  borderColor: "#27ae60",
   borderRadius: 8,
   marginBottom: 12,
   overflow: "hidden",
