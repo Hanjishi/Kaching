@@ -131,7 +131,7 @@ Kaching/
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd "Kaching - Github Repo"
+cd "Kaching"
 ```
 
 2. **Install dependencies**
