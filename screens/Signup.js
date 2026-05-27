@@ -32,7 +32,7 @@ export default function SignupScreen({ navigation }) {
 
       Alert.alert(
         "Success",
-        "Account created successfully. Check your email for confirmation (if required)."
+        "Account created successfully."
       );
       navigation.replace("Login");
     } catch (err) {
