@@ -7,7 +7,7 @@ export default function About() {
     <ScrollView contentContainerStyle={aboutStyles.container}>
       
       <Text style={aboutStyles.title}>ℹ️ About Kaching</Text>
-      <Text style={aboutStyles.subtitle}>Version 1.0.0</Text>
+      <Text style={aboutStyles.subtitle}>Version 1.1.0</Text>
 
       <Text style={aboutStyles.paragraph}>
         <Text style={{ fontWeight: "600" }}>Kaching</Text> is a Smart Budget 
