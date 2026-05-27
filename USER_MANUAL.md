@@ -30,7 +30,7 @@ Kaching is a mobile app that helps you:
 |-------------|---------|
 | **iOS** | iPhone/iPad with iOS 13 or newer |
 | **Android** | Android devices 8.0 or newer |
-| **Internet** | Required for registration; works offline after |
+| **Internet** | Required for registration; |
 | **Storage** | ~50MB free space |
 
 ### Download & Install
@@ -55,11 +55,14 @@ Kaching is a mobile app that helps you:
    - Password: Create a strong password (min 6 characters)
    - Confirm Password: Re-enter password
 4. **Click "Sign Up"**
-5. **Verify email** (check your inbox)
-6. **Complete Profile:**
+
+5. **Complete Profile:**
+   - Navigate to "Profile"
+   - Enter your name
    - Upload profile picture (optional)
    - Confirm your name
-   - Click "Continue"
+   - Set Phone Number
+   - Click "Save Changes"
 
 ### Step 2: Set Your Monthly Budget
 
