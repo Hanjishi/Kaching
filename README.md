@@ -71,12 +71,6 @@ Kaching! aims to:
 
 The project integrates entrepreneurship concepts through the following business strategies:
 
-## Freemium Subscription Model
-- Free basic version
-- Premium subscription simulation
-- Estimated pricing:
-  - ₱49–₱99/month
-
 ## Ads & Sponsorships
 Potential advertising opportunities for:
 - Local bookstores
@@ -135,21 +129,6 @@ Input fields include:
 
 ## Reports
 
-### Free Version
-- Pie chart of expenses by category
-
-### Premium Version
-- Advanced analytics
-- Bar charts
-- Spending trends
-- Monthly comparisons
-
----
-
-## Bill Reminders
-- Upcoming due dates
-- Reminder notifications
-- Add/Edit/Delete reminders
 
 ---
 
@@ -162,20 +141,6 @@ Input fields include:
 
 # Technical Implementation
 
-## Premium Simulation
-
-Premium access is controlled using a flag:
-
-```javascript
-isPremium = true || false;
-```
-
-Conditional rendering is used to:
-- Show premium-only features
-- Lock advanced analytics
-- Simulate subscription upgrades
-
----
 
 # Data Storage
 
@@ -206,16 +171,6 @@ Possible technologies for implementation:
 - Figma
 - JavaScript
 - Android Studio
-
----
-
-# Figma Prototype
-
-The application UI is first designed in Figma to demonstrate:
-- User interface flow
-- Mobile responsiveness
-- User experience design
-- Feature simulation
 
 ---
 
