@@ -23,12 +23,14 @@ export default function SavingsGoalSection({
           <TextInput
             style={styles.input}
             placeholder="What are you saving for?"
+            placeholderTextColor="#6B7280"
             value={goalName}
             onChangeText={setGoalName}
           />
           <TextInput
             style={styles.input}
             placeholder="Target amount (₱)"
+            placeholderTextColor="#6B7280"
             keyboardType="numeric"
             value={goalAmount}
             onChangeText={setGoalAmount}

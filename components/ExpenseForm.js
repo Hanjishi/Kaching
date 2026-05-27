@@ -27,6 +27,7 @@ export default function ExpenseForm({ onSubmit, initialValues }) {
       <TextInput
         style={styles.input}
         placeholder="Amount"
+        placeholderTextColor="#6B7280"
         keyboardType="numeric"
         value={amount}
         onChangeText={setAmount}
@@ -70,6 +71,7 @@ export default function ExpenseForm({ onSubmit, initialValues }) {
       <TextInput
         style={styles.input}
         placeholder="Description"
+        placeholderTextColor="#6B7280"
         value={description}
         onChangeText={setDescription}
       />

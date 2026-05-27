@@ -17,7 +17,7 @@ export default function AddExpense({ navigation }) {
         .single();
 
       if (profileError || !profile) {
-        throw new Error("User profile not found.");
+        throw new Error("User profile not found, Complete Profile Details First.");
       }
 
       const { error } = await supabase.from("expenses_backup").insert([{
